@@ -1,11 +1,9 @@
 import com.github.javafaker.Faker;
 import lombok.Value;
-import lombok.val;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.Locale;
-import java.util.Random;
 
 public class DataGenerator {
 
@@ -14,11 +12,7 @@ public class DataGenerator {
 
     public static String generateDate(int shift) {
         LocalDate localDate = LocalDate.now();
-        if(shift > 0){
-            localDate = localDate.plusDays(shift);
-        }else{
-            localDate = localDate.minusDays(shift);
-        }
+        localDate = localDate.plusDays(shift);
         return localDate.format(DateTimeFormatter.ofPattern("dd.MM.yyyy"));
     }
 
@@ -29,7 +23,12 @@ public class DataGenerator {
 
     public static String generateName(String locale) {
         Faker faker = new Faker(new Locale(locale));
-        return faker.name().name();
+        return faker.name().firstName().replace("Ё", "Е").replace("ё", "е");
+    }
+
+    public static String generateSurname(String locale) {
+        Faker faker = new Faker(new Locale(locale));
+        return faker.name().lastName().replace("Ё", "Е").replace("ё", "е");
     }
 
     public static String generatePhone(String locale) {
@@ -45,8 +44,9 @@ public class DataGenerator {
         public static UserInfo generateUser(String locale) {
             String city = generateCity(locale);
             String name = generateName(locale);
+            String surname = generateSurname(locale);
             String phone = generatePhone(locale);
-            return new UserInfo(city, name, phone);
+            return new UserInfo(city, name, surname, phone);
         }
     }
 
@@ -54,6 +54,7 @@ public class DataGenerator {
     public static class UserInfo {
         String city;
         String name;
+        String surname;
         String phone;
     }
 }

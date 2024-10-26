@@ -1,10 +1,11 @@
-
-
+import com.codeborne.selenide.Condition;
+import com.codeborne.selenide.SelenideElement;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.openqa.selenium.Keys;
 
-import static com.codeborne.selenide.Selenide.open;
+import static com.codeborne.selenide.Selenide.*;
 
 class WebTest {
 
@@ -21,10 +22,40 @@ class WebTest {
         var firstMeetingDate = DataGenerator.generateDate(daysToAddForFirstMeeting);
         var daysToAddForSecondMeeting = 7;
         var secondMeetingDate = DataGenerator.generateDate(daysToAddForSecondMeeting);
-        // TODO: добавить логику теста в рамках которого будет выполнено планирование и перепланирование встречи.
-        // Для заполнения полей формы можно использовать пользователя validUser и строки с датами в переменных
-        // firstMeetingDate и secondMeetingDate. Можно также вызывать методы generateCity(locale),
-        // generateName(locale), generatePhone(locale) для генерации и получения в тесте соответственно города,
-        // имени и номера телефона без создания пользователя в методе generateUser(String locale) в датагенераторе
+
+        SelenideElement form = $("form");
+
+        SelenideElement cityInput = form.find("[data-test-id=city] input");
+        cityInput.setValue(validUser.getCity());
+
+        SelenideElement dateInput = form.find("[data-test-id=date] input");
+        dateInput.sendKeys(Keys.chord(Keys.SHIFT, Keys.HOME), Keys.BACK_SPACE);
+        dateInput.setValue(firstMeetingDate);
+
+        SelenideElement nameAndSurnameInput = form
+                .find("[data-test-id=name] input");
+        nameAndSurnameInput.setValue(validUser.getName() + " " + validUser.getSurname());
+
+        SelenideElement phoneInput = form
+                .find("[data-test-id=phone] input");
+        phoneInput.setValue(validUser.getPhone());
+
+        SelenideElement agreementInput = form
+                .find("[data-test-id=agreement] span");
+        agreementInput.click();
+
+        SelenideElement billButton = form.find(".button_theme_alfa-on-white");
+        billButton.click();
+
+        dateInput.sendKeys(Keys.chord(Keys.SHIFT, Keys.HOME), Keys.BACK_SPACE);
+        dateInput.setValue(secondMeetingDate);
+        billButton.click();
+
+        SelenideElement replanButton = $("[data-test-id=replan-notification] button");
+        replanButton.click();
+
+        $$("[data-test-id=success-notification] div.notification__content").filter(Condition.visible)
+                .get(0).shouldHave(Condition.exactText("Встреча успешно запланирована на " + secondMeetingDate));
+
     }
 }
