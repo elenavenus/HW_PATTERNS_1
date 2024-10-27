@@ -17,12 +17,13 @@ class WebTest {
     @Test
     @DisplayName("Should successful plan and replan meeting")
     void shouldSuccessfulPlanAndReplanMeeting() {
+        //подготовка данных
         var validUser = DataGenerator.Registration.generateUser("ru");
         var daysToAddForFirstMeeting = 4;
         var firstMeetingDate = DataGenerator.generateDate(daysToAddForFirstMeeting);
         var daysToAddForSecondMeeting = 7;
         var secondMeetingDate = DataGenerator.generateDate(daysToAddForSecondMeeting);
-
+        //первочнальный поиск элементов и вставка значений
         SelenideElement form = $("form");
 
         SelenideElement cityInput = form.find("[data-test-id=city] input");
@@ -44,18 +45,25 @@ class WebTest {
                 .find("[data-test-id=agreement] span");
         agreementInput.click();
 
+        //Проверка 1 - проверяем первичное бронирование
         SelenideElement billButton = form.find(".button_theme_alfa-on-white");
         billButton.click();
 
+        $("[data-test-id=success-notification] div.notification__content")
+                .should(Condition.visible)
+                .shouldHave(Condition.exactText("Встреча успешно запланирована на " + firstMeetingDate));
+        //Проверка 2 - меняем дату и проверяем на наличие уведомления о перепланировке
         dateInput.sendKeys(Keys.chord(Keys.SHIFT, Keys.HOME), Keys.BACK_SPACE);
         dateInput.setValue(secondMeetingDate);
         billButton.click();
-
-        SelenideElement replanButton = $("[data-test-id=replan-notification] button");
+        SelenideElement replanButton = $("[data-test-id=replan-notification] button").should(Condition.visible);
+        //Проверка 3 - нажимаем кнопку перепланирования и проверяем на наличие уведомления
+        //об успешном бронировании на новую дату
         replanButton.click();
 
-        $$("[data-test-id=success-notification] div.notification__content").filter(Condition.visible)
-                .get(0).shouldHave(Condition.exactText("Встреча успешно запланирована на " + secondMeetingDate));
+        $("[data-test-id=success-notification] div.notification__content")
+                .should(Condition.visible)
+                .shouldHave(Condition.exactText("Встреча успешно запланирована на " + secondMeetingDate));
 
     }
 }
